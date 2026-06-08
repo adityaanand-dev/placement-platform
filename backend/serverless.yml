@@ -1,0 +1,36 @@
+service: placement-platform
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ap-south-1
+  stage: dev
+  environment:
+    USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}
+    APP_CLIENT_ID: ${env:COGNITO_APP_CLIENT_ID}
+
+useDotenv: true
+
+build:
+  esbuild:
+    bundle: true
+    minify: false
+    format: cjs
+    target: node18
+
+functions:
+  authorizer:
+    handler: src/authorizer.handler
+
+  hello:
+    handler: src/hello.handler
+    events:
+      - http:
+          path: /hello
+          method: get
+          cors: true
+          authorizer:
+            name: authorizer
+            type: token
+            identitySource: method.request.header.Authorization
+            resultTtlInSeconds: 0
