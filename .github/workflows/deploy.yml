@@ -2,24 +2,27 @@ name: Deploy Backend
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
-      - uses: actions/setup-node@v4
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set Up Node.js Runtime
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
-          
-      - name: Install dependencies
+
+      - name: Install Application Dependencies
         run: |
           cd backend
           npm install
-          
-      - name: Deploy to AWS
+
+      - name: Deploy Serverless Stack to AWS
         run: |
           cd backend
           npx serverless deploy --force
