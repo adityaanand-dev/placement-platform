@@ -1,4 +1,4 @@
-service: placement-platform-backend
+service: placement-recruitment-backend
 
 provider:
   name: aws
