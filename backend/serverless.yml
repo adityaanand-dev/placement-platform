@@ -1,12 +1,13 @@
 service: placement-platform-backend
 
-frameworkVersion: '4'
-useDotenv: true
-
 provider:
   name: aws
   runtime: nodejs18.x
   region: ap-south-1
+
+
+# ... keep your iam, functions, and resources blocks exactly the same as before! ...
+
 
   # Inject Identity & Access Management (IAM) permissions for database interactions
   iam:

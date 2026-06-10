@@ -25,10 +25,9 @@ jobs:
       - name: Deploy Serverless Stack to AWS
         run: |
           cd backend
-          npx serverless deploy --force --stage dev
+          npx serverless@3 deploy --force --stage dev  # 💡 Added @3 to force the open-source runner!
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           COGNITO_USER_POOL_ID: ${{ secrets.COGNITO_USER_POOL_ID }}
           COGNITO_APP_CLIENT_ID: ${{ secrets.COGNITO_APP_CLIENT_ID }}
-          SERVERLESS_ACCESS_KEY: "NEVER_PROMPT"
