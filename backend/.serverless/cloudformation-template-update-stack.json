@@ -97,7 +97,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
-          "S3Key": "serverless/placement-platform/dev/1780903119705-2026-06-08T07:18:39.705Z/placement-platform.zip"
+          "S3Key": "serverless/placement-platform/dev/1780983865293-2026-06-09T05:44:25.293Z/placement-platform.zip"
         },
         "Handler": "src/authorizer.handler",
         "Runtime": "nodejs18.x",
@@ -127,7 +127,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
-          "S3Key": "serverless/placement-platform/dev/1780903119705-2026-06-08T07:18:39.705Z/placement-platform.zip"
+          "S3Key": "serverless/placement-platform/dev/1780983865293-2026-06-09T05:44:25.293Z/placement-platform.zip"
         },
         "Handler": "src/hello.handler",
         "Runtime": "nodejs18.x",
@@ -152,24 +152,24 @@
         "HelloLogGroup"
       ]
     },
-    "AuthorizerLambdaVersionRgbwGh3UrKHvtKpbljqbEGgnvefF3kuyLLzIk4Ogw": {
+    "AuthorizerLambdaVersionaOFxTWkYomOb1RNTE2cARX9MieVEmQdVqyXiaeDqlQ": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "AuthorizerLambdaFunction"
         },
-        "CodeSha256": "Ojb7m/iAIs0gwP5RunwrEKIonyl34uKYpQsloTtwuDs="
+        "CodeSha256": "ryraDQFpPkgRc10Ftz630BBzpM7wokS1d8cAUIcPm28="
       }
     },
-    "HelloLambdaVersion5Mt5IxgoEbkjKIEJAIEvgXXHtndm9vpVkAyJMcEx4": {
+    "HelloLambdaVersionltDrKkzcPglDSHtNUEMZiGrTiO4YEVlWa3v1Rhb9LUs": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "HelloLambdaFunction"
         },
-        "CodeSha256": "Ojb7m/iAIs0gwP5RunwrEKIonyl34uKYpQsloTtwuDs="
+        "CodeSha256": "ryraDQFpPkgRc10Ftz630BBzpM7wokS1d8cAUIcPm28="
       }
     },
     "ApiGatewayRestApi": {
@@ -328,7 +328,7 @@
         "Type": "TOKEN"
       }
     },
-    "ApiGatewayDeployment1780903111952": {
+    "ApiGatewayDeployment1780983856012": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -426,7 +426,7 @@
     "AuthorizerLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "AuthorizerLambdaVersionRgbwGh3UrKHvtKpbljqbEGgnvefF3kuyLLzIk4Ogw"
+        "Ref": "AuthorizerLambdaVersionaOFxTWkYomOb1RNTE2cARX9MieVEmQdVqyXiaeDqlQ"
       },
       "Export": {
         "Name": "sls-placement-platform-dev-AuthorizerLambdaFunctionQualifiedArn"
@@ -435,7 +435,7 @@
     "HelloLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "HelloLambdaVersion5Mt5IxgoEbkjKIEJAIEvgXXHtndm9vpVkAyJMcEx4"
+        "Ref": "HelloLambdaVersionltDrKkzcPglDSHtNUEMZiGrTiO4YEVlWa3v1Rhb9LUs"
       },
       "Export": {
         "Name": "sls-placement-platform-dev-HelloLambdaFunctionQualifiedArn"

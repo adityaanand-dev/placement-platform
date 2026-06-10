@@ -1,36 +1,43 @@
-service: placement-platform
-
+service: placement-platform-backend
 provider:
   name: aws
   runtime: nodejs18.x
   region: ap-south-1
-  stage: dev
-  environment:
-    USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}
-    APP_CLIENT_ID: ${env:COGNITO_APP_CLIENT_ID}
 
-useDotenv: true
-
-build:
-  esbuild:
-    bundle: true
-    minify: false
-    format: cjs
-    target: node18
+  # 1. Inject Identity & Access Management (IAM) permissions for database interactions
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+            - dynamodb:Scan
+          Resource: 'arn:aws:dynamodb:ap-south-1:*:table/Students'
 
 functions:
-  authorizer:
-    handler: src/authorizer.handler
-
-  hello:
-    handler: src/hello.handler
+  registerStudent:
+    handler: src/students.register
     events:
       - http:
-          path: /hello
-          method: get
+          path: /students/register
+          method: post
           cors: true
-          authorizer:
-            name: authorizer
-            type: token
-            identitySource: method.request.header.Authorization
-            resultTtlInSeconds: 0
+
+# 2. Tell AWS to automatically build the DynamoDB Table infrastructure
+resources:
+  Resources:
+    StudentsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Students
+        BillingMode: PAY_PER_REQUEST # Serverless auto-scaling billing
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH # Configures email as the unique Partition Key
