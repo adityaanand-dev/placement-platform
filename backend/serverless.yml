@@ -5,11 +5,6 @@ provider:
   runtime: nodejs18.x
   region: ap-south-1
 
-
-# ... keep your iam, functions, and resources blocks exactly the same as before! ...
-
-
-  # Inject Identity & Access Management (IAM) permissions for database interactions
   iam:
     role:
       statements:
@@ -21,7 +16,7 @@ provider:
             - dynamodb:DeleteItem
             - dynamodb:Query
             - dynamodb:Scan
-          Resource: 'arn:aws:dynamodb:ap-south-1:*:table/Students'
+          Resource: 'arn:aws:dynamodb:ap-south-1:*:table/PlacementPlatformStudents'
 
 functions:
   registerStudent:
@@ -32,13 +27,12 @@ functions:
           method: post
           cors: true
 
-# Tell AWS to automatically build the DynamoDB Table infrastructure
 resources:
   Resources:
     StudentsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: Students
+        TableName: PlacementPlatformStudents
         BillingMode: PAY_PER_REQUEST
         AttributeDefinitions:
           - AttributeName: email
