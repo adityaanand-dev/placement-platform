@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { Amplify } from "aws-amplify"; // 🟢 Added to ensure AWS configurations initialization works seamlessly
 
 // Minimal global reset — no CSS file needed
 const style = document.createElement("style");

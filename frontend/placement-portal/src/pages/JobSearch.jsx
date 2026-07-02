@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 
 const C = {
@@ -47,7 +46,6 @@ function MatchBadge({ pct }) {
 }
 
 export default function JobSearch() {
-  const navigate = useNavigate();
   const { currentUser, jobs, companies, applyToJob, updateCurrentUser } = useApp();
 
   const [query,    setQuery]    = useState("");
