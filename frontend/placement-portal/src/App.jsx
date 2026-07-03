@@ -71,6 +71,10 @@ function AppRoutes() {
         path="/verify-email"
         element={<VerifyEmail />}
       />
+      <Route
+        path="/"
+        element={currentUser ? <Navigate to={homeFor(currentUser)} replace /> : <Navigate to="/login" replace />}
+      />
       <Route 
         path="/student" 
         element={
