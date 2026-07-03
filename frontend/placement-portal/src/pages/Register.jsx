@@ -421,7 +421,7 @@ export default function Register() {
     if (!registerStudent) return;
     const res = await registerStudent(data);
     if (res?.ok) {
-      navigate("/student/dashboard");
+      navigate("/verify-email", { state: { email: data.email, role: "student" } });
     } else {
       throw new Error(res?.error || "Student profile creation rejected.");
     }
@@ -431,7 +431,7 @@ export default function Register() {
     if (!registerCompany) return;
     const res = await registerCompany(data);
     if (res?.ok) {
-      navigate("/company/dashboard");
+      navigate("/verify-email", { state: { email: data.email, role: "company" } });
     } else {
       throw new Error(res?.error || "Company profile creation rejected.");
     }

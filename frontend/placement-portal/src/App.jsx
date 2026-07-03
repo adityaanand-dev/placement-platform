@@ -8,6 +8,7 @@ import CompanyLayout from "./layouts/CompanyLayout";
 // Auth pages
 import Login    from "./pages/Login";
 import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
 
 // Student pages
 import StudentDashboard     from "./pages/StudentDashboard";
@@ -66,14 +67,10 @@ function AppRoutes() {
         path="/register"
         element={!currentUser ? <Register /> : <Navigate to={homeFor(currentUser)} replace />}
       />
-
-      {/* Default Fallback Redirect */}
       <Route
-        path="/"
-        element={currentUser ? <Navigate to={homeFor(currentUser)} replace /> : <Navigate to="/login" replace />}
+        path="/verify-email"
+        element={<VerifyEmail />}
       />
-
-      {/* ── Student Routes — Modernized Parent-Child Layout Nesting ── */}
       <Route 
         path="/student" 
         element={

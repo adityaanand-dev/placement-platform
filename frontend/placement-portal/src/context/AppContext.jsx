@@ -11,6 +11,7 @@ const SEED_STUDENTS = [
     skills: ["AWS", "Linux", "Docker", "Python"], certs: ["AWS CLF-C02", "NPTEL Cloud"],
     bio: "Cloud & DevOps enthusiast building serverless apps.", linkedin: "", github: "",
     resumeKey: null, appliedJobs: [], savedJobs: [], profileComplete: 68,
+    verified: true, verificationCode: null,
   },
   {
     id: "s2", role: "student", name: "Priya Sharma", email: "priya@example.com",
@@ -19,6 +20,7 @@ const SEED_STUDENTS = [
     skills: ["Python", "ML", "TensorFlow", "SQL"], certs: ["GCP ACE"],
     bio: "ML engineer with hands-on project experience.", linkedin: "", github: "",
     resumeKey: null, appliedJobs: [], savedJobs: [], profileComplete: 85,
+    verified: true, verificationCode: null,
   },
   {
     id: "s3", role: "student", name: "Rahul Verma", email: "rahul@example.com",
@@ -27,6 +29,7 @@ const SEED_STUDENTS = [
     skills: ["DevOps", "Kubernetes", "CI/CD", "Terraform"], certs: ["CKA (Kubernetes)"],
     bio: "DevOps intern with production CI/CD experience.", linkedin: "", github: "",
     resumeKey: null, appliedJobs: [], savedJobs: [], profileComplete: 72,
+    verified: true, verificationCode: null,
   },
 ];
 
@@ -38,6 +41,7 @@ const SEED_COMPANIES = [
     hrName: "Meena Iyer", hrDesignation: "Talent Acquisition Lead",
     description: "India's largest IT services company.",
     postedJobs: ["j1", "j2"],
+    verified: true, verificationCode: null,
   },
   {
     id: "c2", role: "company", name: "Amazon Web Services", email: "hr@aws.com",
@@ -46,6 +50,7 @@ const SEED_COMPANIES = [
     hrName: "Rajan Mehta", hrDesignation: "University Hiring Manager",
     description: "World's most adopted cloud platform.",
     postedJobs: ["j3"],
+    verified: true, verificationCode: null,
   },
 ];
 
@@ -191,6 +196,46 @@ export function AppProvider({ children }) {
     saveStore({ messages: next }); return next;
   });
 
+  const generateVerificationCode = () => Math.floor(100000 + Math.random() * 900000).toString();
+
+  const findUserByEmail = (email) => {
+    const normalizedEmail = email.trim().toLowerCase();
+    return students.find(u => u.email.toLowerCase() === normalizedEmail) ||
+           companies.find(u => u.email.toLowerCase() === normalizedEmail);
+  };
+
+  const updateUserRecord = (userId, role, updater) => {
+    if (role === "student") {
+      persistStudents(p => p.map(u => u.id === userId ? (typeof updater === "function" ? updater(u) : updater) : u));
+    } else {
+      persistCompanies(p => p.map(u => u.id === userId ? (typeof updater === "function" ? updater(u) : updater) : u));
+    }
+  };
+
+  const sendVerificationEmail = (email) => {
+    const user = findUserByEmail(email);
+    if (!user) return null;
+    const code = generateVerificationCode();
+    updateUserRecord(user.id, user.role, (u) => ({ ...u, verificationCode: code }));
+    addNotification({
+      to: user.id,
+      from: "system",
+      type: "verification",
+      title: "Verify your email address",
+      body: `Your verification code is ${code}. Enter it on the verification page to complete account activation.`,
+    });
+    return code;
+  };
+
+  const verifyEmail = (email, code) => {
+    const user = findUserByEmail(email);
+    if (!user) return { ok: false, error: "No account found for this email." };
+    if (user.verified) return { ok: true, message: "Email already verified." };
+    if (user.verificationCode !== code.trim()) return { ok: false, error: "Incorrect verification code." };
+    updateUserRecord(user.id, user.role, (u) => ({ ...u, verified: true, verificationCode: null }));
+    return { ok: true, message: "Email verified successfully." };
+  };
+
   const threadKey = (a, b) => [a, b].sort().join("_");
 
   const sendMessage = (data) => {
@@ -255,6 +300,9 @@ export function AppProvider({ children }) {
       u => u.email.toLowerCase() === normalizedEmail && u.password === password
     );
     if (!user) return { ok: false, error: "Invalid email or password." };
+    if (!user.verified) {
+      return { ok: false, error: "Email not verified. Check your inbox for the verification code." };
+    }
     if (expectedRole && user.role !== expectedRole) {
       return {
         ok: false,
@@ -275,32 +323,46 @@ export function AppProvider({ children }) {
     const normalizedEmail = data.email.trim().toLowerCase();
     if ([...students, ...companies].find(u => u.email.toLowerCase() === normalizedEmail))
       return { ok: false, error: "An account with this email already exists." };
+    const code = generateVerificationCode();
     const newStudent = {
       ...data,
       email: normalizedEmail,
       id: `s${Date.now()}`,
       role: "student",
       appliedJobs: [], savedJobs: [], profileComplete: 40, resumeKey: null,
+      verified: false,
+      verificationCode: code,
     };
     persistStudents(p => [...p, newStudent]);
-    setCurrentUser(newStudent);
-    return { ok: true, user: newStudent };
+    addNotification({
+      to: newStudent.id, from: "system", type: "verification",
+      title: "Verify your email for LaunchPad",
+      body: `Your verification code is ${code}. Enter it to complete registration.`,
+    });
+    return { ok: true, user: newStudent, verificationNeeded: true, verificationCode: code };
   };
 
   const registerCompany = (data) => {
     const normalizedEmail = data.email.trim().toLowerCase();
     if ([...students, ...companies].find(u => u.email.toLowerCase() === normalizedEmail))
       return { ok: false, error: "An account with this email already exists." };
+    const code = generateVerificationCode();
     const newCompany = {
       ...data,
       email: normalizedEmail,
       id: `c${Date.now()}`,
       role: "company",
       postedJobs: [],
+      verified: false,
+      verificationCode: code,
     };
     persistCompanies(p => [...p, newCompany]);
-    setCurrentUser(newCompany);
-    return { ok: true, user: newCompany };
+    addNotification({
+      to: newCompany.id, from: "system", type: "verification",
+      title: "Verify your email for LaunchPad",
+      body: `Your verification code is ${code}. Enter it to complete registration.`,
+    });
+    return { ok: true, user: newCompany, verificationNeeded: true, verificationCode: code };
   };
 
   const updateCurrentUser = (data) => {
@@ -421,7 +483,7 @@ export function AppProvider({ children }) {
   return (
     <AppCtx.Provider value={{
       currentUser,
-      login, logout, registerStudent, registerCompany, updateCurrentUser,
+      login, logout, registerStudent, registerCompany, sendVerificationEmail, verifyEmail, updateCurrentUser,
       students, companies, jobs, interviews, notifications, offerLetters,
       postJob, applyToJob,
       scheduleInterview, updateInterviewStatus,

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 
 const C = {
@@ -19,10 +19,13 @@ const inp = {
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useApp(); // 🟢 Direct hook into local simulation auth engine
 
-  const [tab,      setTab]      = useState("student"); // "student" | "company"
-  const [email,    setEmail]    = useState("");
+  const { email: initialEmail = "", role: initialRole = "student" } = location.state || {};
+
+  const [tab,      setTab]      = useState(initialRole);
+  const [email,    setEmail]    = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading,  setLoading]  = useState(false);
