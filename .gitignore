@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Serverless & Build directories
+.serverless/
+.esbuild/
+dist/
+build/
+
+# Environmental Secrets (CRITICAL)
+.env
+*.env
+.env.local
+.env.*.local
+
+# Operating System files
+.DS_Store
+Thumbs.db

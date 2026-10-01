@@ -1,33 +1,165 @@
 {
   "service": {
-    "service": "placement-platform",
+    "service": "placement-recruitment-backend",
     "serviceObject": {
-      "name": "placement-platform"
+      "name": "placement-recruitment-backend"
     },
     "provider": {
       "name": "aws",
       "runtime": "nodejs18.x",
       "region": "ap-south-1",
-      "stage": "dev",
       "environment": {
-        "USER_POOL_ID": "ap-south-1_aH0VMo3ZT",
-        "APP_CLIENT_ID": "g3ef1c2gal9pvorrr2nqiftt7"
+        "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+        "FROM_EMAIL": "aaa.adityaanand@gmail.com"
       },
+      "iam": {
+        "role": {
+          "statements": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Query",
+                "dynamodb:Scan"
+              ],
+              "Resource": [
+                "arn:aws:dynamodb:ap-south-1:*:table/PlacementPlatformStudents",
+                "arn:aws:dynamodb:ap-south-1:*:table/PlacementPlatformCompanies",
+                "arn:aws:dynamodb:ap-south-1:*:table/PlacementPlatformJobs",
+                "arn:aws:dynamodb:ap-south-1:*:table/PlacementPlatformApplications",
+                "arn:aws:dynamodb:ap-south-1:*:table/PlacementPlatformApplications/index/*",
+                "arn:aws:dynamodb:ap-south-1:*:table/Interviews",
+                "arn:aws:dynamodb:ap-south-1:*:table/Interviews/index/*"
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject"
+              ],
+              "Resource": "arn:aws:s3:::placement-resumes-dev-adityaanand/*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ses:SendEmail"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      },
+      "stage": "dev",
       "versionFunctions": true,
       "compiledCloudFormationTemplate": {
         "AWSTemplateFormatVersion": "2010-09-09",
         "Description": "The AWS CloudFormation template for this Serverless application",
         "Resources": {
-          "AuthorizerLogGroup": {
+          "RegisterStudentLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/placement-platform-dev-authorizer"
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-registerStudent"
             }
           },
-          "HelloLogGroup": {
+          "GetStudentLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/placement-platform-dev-hello"
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-getStudent"
+            }
+          },
+          "UpdateStudentLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-updateStudent"
+            }
+          },
+          "GetResumeUploadUrlLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-getResumeUploadUrl"
+            }
+          },
+          "RegisterCompanyLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-registerCompany"
+            }
+          },
+          "GetCompanyLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-getCompany"
+            }
+          },
+          "ListStudentsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-listStudents"
+            }
+          },
+          "CreateJobLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-createJob"
+            }
+          },
+          "ListJobsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-listJobs"
+            }
+          },
+          "GetJobLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-getJob"
+            }
+          },
+          "ApplyJobLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-applyJob"
+            }
+          },
+          "UpdateApplicationStatusLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-updateApplicationStatus"
+            }
+          },
+          "GetStudentApplicationsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-getStudentApplications"
+            }
+          },
+          "CreateInterviewLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-createInterview"
+            }
+          },
+          "GetInterviewsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-getInterviews"
+            }
+          },
+          "ParseResumeLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-parseResume"
+            }
+          },
+          "GenerateOfferLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/placement-recruitment-backend-dev-generateOffer"
             }
           },
           "IamRoleLambdaExecution": {
@@ -55,7 +187,7 @@
                     "Fn::Join": [
                       "-",
                       [
-                        "placement-platform",
+                        "placement-recruitment-backend",
                         "dev",
                         "lambda"
                       ]
@@ -73,7 +205,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/placement-platform-dev*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/placement-recruitment-backend-dev*:*"
                           }
                         ]
                       },
@@ -84,9 +216,18 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/placement-platform-dev*:*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/placement-recruitment-backend-dev*:*:*"
                           }
                         ]
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][0]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][1]"
+                      },
+                      {
+                        "$ref": "$[\"service\"][\"provider\"][\"iam\"][\"role\"][\"statements\"][2]"
                       }
                     ]
                   }
@@ -97,7 +238,7 @@
                 "Fn::Join": [
                   "-",
                   [
-                    "placement-platform",
+                    "placement-recruitment-backend",
                     "dev",
                     {
                       "Ref": "AWS::Region"
@@ -108,23 +249,22 @@
               }
             }
           },
-          "AuthorizerLambdaFunction": {
+          "RegisterStudentLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
-                "S3Key": "serverless/placement-platform/dev/1780983865293-2026-06-09T05:44:25.293Z/placement-platform.zip"
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
               },
-              "Handler": "src/authorizer.handler",
+              "Handler": "src/students.register",
               "Runtime": "nodejs18.x",
-              "FunctionName": "placement-platform-dev-authorizer",
+              "FunctionName": "placement-recruitment-backend-dev-registerStudent",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
                 "Variables": {
-                  "USER_POOL_ID": "ap-south-1_aH0VMo3ZT",
-                  "APP_CLIENT_ID": "g3ef1c2gal9pvorrr2nqiftt7",
-                  "NODE_OPTIONS": "--enable-source-maps"
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
                 }
               },
               "Role": {
@@ -135,26 +275,25 @@
               }
             },
             "DependsOn": [
-              "AuthorizerLogGroup"
+              "RegisterStudentLogGroup"
             ]
           },
-          "HelloLambdaFunction": {
+          "GetStudentLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
-                "S3Key": "serverless/placement-platform/dev/1780983865293-2026-06-09T05:44:25.293Z/placement-platform.zip"
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
               },
-              "Handler": "src/hello.handler",
+              "Handler": "src/students.getById",
               "Runtime": "nodejs18.x",
-              "FunctionName": "placement-platform-dev-hello",
+              "FunctionName": "placement-recruitment-backend-dev-getStudent",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
                 "Variables": {
-                  "USER_POOL_ID": "ap-south-1_aH0VMo3ZT",
-                  "APP_CLIENT_ID": "g3ef1c2gal9pvorrr2nqiftt7",
-                  "NODE_OPTIONS": "--enable-source-maps"
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
                 }
               },
               "Role": {
@@ -165,33 +304,618 @@
               }
             },
             "DependsOn": [
-              "HelloLogGroup"
+              "GetStudentLogGroup"
             ]
           },
-          "AuthorizerLambdaVersionaOFxTWkYomOb1RNTE2cARX9MieVEmQdVqyXiaeDqlQ": {
+          "UpdateStudentLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/students.update",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-updateStudent",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "UpdateStudentLogGroup"
+            ]
+          },
+          "GetResumeUploadUrlLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/resumes.getUploadUrl",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-getResumeUploadUrl",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "GetResumeUploadUrlLogGroup"
+            ]
+          },
+          "RegisterCompanyLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/companies.register",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-registerCompany",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "RegisterCompanyLogGroup"
+            ]
+          },
+          "GetCompanyLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/companies.getById",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-getCompany",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "GetCompanyLogGroup"
+            ]
+          },
+          "ListStudentsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/companies.listStudents",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-listStudents",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "ListStudentsLogGroup"
+            ]
+          },
+          "CreateJobLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/jobs.create",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-createJob",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "CreateJobLogGroup"
+            ]
+          },
+          "ListJobsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/jobs.list",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-listJobs",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "ListJobsLogGroup"
+            ]
+          },
+          "GetJobLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/jobs.getById",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-getJob",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "GetJobLogGroup"
+            ]
+          },
+          "ApplyJobLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/applications.apply",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-applyJob",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "ApplyJobLogGroup"
+            ]
+          },
+          "UpdateApplicationStatusLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/applications.updateStatus",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-updateApplicationStatus",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "UpdateApplicationStatusLogGroup"
+            ]
+          },
+          "GetStudentApplicationsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/applications.getByStudent",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-getStudentApplications",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "GetStudentApplicationsLogGroup"
+            ]
+          },
+          "CreateInterviewLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/interviews.create",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-createInterview",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "CreateInterviewLogGroup"
+            ]
+          },
+          "GetInterviewsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/interviews.getByApplication",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-getInterviews",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "GetInterviewsLogGroup"
+            ]
+          },
+          "ParseResumeLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/resumeParser.handler",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-parseResume",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "ParseResumeLogGroup"
+            ]
+          },
+          "GenerateOfferLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
+                "S3Key": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z/placement-recruitment-backend.zip"
+              },
+              "Handler": "src/offerLetter.generate",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "placement-recruitment-backend-dev-generateOffer",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "RESUME_BUCKET": "placement-resumes-dev-adityaanand",
+                  "FROM_EMAIL": "aaa.adityaanand@gmail.com"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              }
+            },
+            "DependsOn": [
+              "GenerateOfferLogGroup"
+            ]
+          },
+          "RegisterStudentLambdaVersionFS6RvT9eLaA7xmBxarERw4fuZVHWljv57aaZN5SsOQ": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "AuthorizerLambdaFunction"
+                "Ref": "RegisterStudentLambdaFunction"
               },
-              "CodeSha256": "ryraDQFpPkgRc10Ftz630BBzpM7wokS1d8cAUIcPm28="
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
             }
           },
-          "HelloLambdaVersionltDrKkzcPglDSHtNUEMZiGrTiO4YEVlWa3v1Rhb9LUs": {
+          "GetStudentLambdaVersionAlWUCcUOpYkyUsaO4WEVuTCJTW7gReObSOK7PWmsVo": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "HelloLambdaFunction"
+                "Ref": "GetStudentLambdaFunction"
               },
-              "CodeSha256": "ryraDQFpPkgRc10Ftz630BBzpM7wokS1d8cAUIcPm28="
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "UpdateStudentLambdaVersionG49xH4oH6OtXcZY7Q1Xoy52MmtP6xBk7g6gcBMH8": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "UpdateStudentLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "GetResumeUploadUrlLambdaVersionMrz5p8wzNRXGHtFCNX1M3CNXD8ohiWspIUI3d7ueSNc": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetResumeUploadUrlLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "RegisterCompanyLambdaVersion9bDr9xe29ibTFU9RxyeYXOUaIKXduJw7cmaGSJ76GI": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "RegisterCompanyLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "GetCompanyLambdaVersionCooM6aXWneOioLNaCHLz5KpFPro7zyZ36JX5U4qdaYI": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetCompanyLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "ListStudentsLambdaVersionVJRX9b5whuTRrC6zPhbDMOirGcUMwJZKJuyyQ1ePfk": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "ListStudentsLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "CreateJobLambdaVersionuqToqAmLZRMAWTeFNl5mZpq3zANHP6eCtKoz1IPE": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CreateJobLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "ListJobsLambdaVersion1dt32smrSKAW2GenfQ7ak0pXVQrUJo1lQK9ieTM": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "ListJobsLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "GetJobLambdaVersionbPWZn0vcrJSQwsZn8BlAI7EtJivuGaV28GLoxEGjY": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetJobLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "ApplyJobLambdaVersion2TBNWoEFmH0fcm8Vtfc72EA6EHrR3MZGqf8FGVoOFM": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "ApplyJobLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "UpdateApplicationStatusLambdaVersionVHe9aajPLl2X0lx3P8EbnTgnO5edTBVgJH8J58R040": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "UpdateApplicationStatusLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "GetStudentApplicationsLambdaVersionx0mgf3saAoJDbrk72wWsNGnUVXmePXjlZfGnmacNg": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetStudentApplicationsLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "CreateInterviewLambdaVersion7DjSVxY4zJXaNlWL7toSIh3wy3HPVwQgeaS2Wh1u6XA": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CreateInterviewLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "GetInterviewsLambdaVersion6ZixzMUe6fhNCH7AvEVlpNhhFXeXREmT0fBzxyrzLk": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetInterviewsLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "ParseResumeLambdaVersionYGNNCCKgxPePI0Z8nf67zyKd55SEOTuGaA4MzUi1Xw": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "ParseResumeLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
+            }
+          },
+          "GenerateOfferLambdaVersionBWUEKlnKPEJkmRM1wkLss5wzUeT0bjV3HyCH42vq4A": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GenerateOfferLambdaFunction"
+              },
+              "CodeSha256": "DtsgG4NMWBp8n1Pa/Q8+BiNyi1i4cPelgzVVZ/mA690="
             }
           },
           "ApiGatewayRestApi": {
             "Type": "AWS::ApiGateway::RestApi",
             "Properties": {
-              "Name": "dev-placement-platform",
+              "Name": "dev-placement-recruitment-backend",
               "EndpointConfiguration": {
                 "Types": [
                   "EDGE"
@@ -200,7 +924,7 @@
               "Policy": ""
             }
           },
-          "ApiGatewayResourceHello": {
+          "ApiGatewayResourceStudents": {
             "Type": "AWS::ApiGateway::Resource",
             "Properties": {
               "ParentId": {
@@ -209,13 +933,346 @@
                   "RootResourceId"
                 ]
               },
-              "PathPart": "hello",
+              "PathPart": "students",
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
             }
           },
-          "ApiGatewayMethodHelloOptions": {
+          "ApiGatewayResourceStudentsRegister": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceStudents"
+              },
+              "PathPart": "register",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceStudentsEmailVar": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceStudents"
+              },
+              "PathPart": "{email}",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceStudentsEmailVarResumeDashurl": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceStudentsEmailVar"
+              },
+              "PathPart": "resume-url",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceCompanies": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "companies",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceCompaniesRegister": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceCompanies"
+              },
+              "PathPart": "register",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceCompaniesEmailVar": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceCompanies"
+              },
+              "PathPart": "{email}",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceCompaniesStudents": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceCompanies"
+              },
+              "PathPart": "students",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceJobs": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "jobs",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceJobsIdVar": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceJobs"
+              },
+              "PathPart": "{id}",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceApplications": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "applications",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceApplicationsIdVar": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceApplications"
+              },
+              "PathPart": "{id}",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceApplicationsIdVarStatus": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceApplicationsIdVar"
+              },
+              "PathPart": "status",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceApplicationsStudent": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceApplications"
+              },
+              "PathPart": "student",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceApplicationsStudentEmailVar": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceApplicationsStudent"
+              },
+              "PathPart": "{email}",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceInterviews": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "interviews",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceInterviewsApplication": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceInterviews"
+              },
+              "PathPart": "application",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceInterviewsApplicationApplicationidVar": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceInterviewsApplication"
+              },
+              "PathPart": "{applicationId}",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceOffers": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "offers",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayResourceOffersGenerate": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Ref": "ApiGatewayResourceOffers"
+              },
+              "PathPart": "generate",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodStudentsRegisterOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceStudentsRegister"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodStudentsEmailVarOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,PUT,GET'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceStudentsEmailVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodStudentsEmailVarResumeDashurlOptions": {
             "Type": "AWS::ApiGateway::Method",
             "Properties": {
               "AuthorizationType": "NONE",
@@ -253,29 +1310,521 @@
                 ]
               },
               "ResourceId": {
-                "Ref": "ApiGatewayResourceHello"
+                "Ref": "ApiGatewayResourceStudentsEmailVarResumeDashurl"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               }
             }
           },
-          "ApiGatewayMethodHelloGet": {
+          "ApiGatewayMethodCompaniesRegisterOptions": {
             "Type": "AWS::ApiGateway::Method",
             "Properties": {
-              "HttpMethod": "GET",
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceCompaniesRegister"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodCompaniesEmailVarOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceCompaniesEmailVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodCompaniesStudentsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceCompaniesStudents"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodJobsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,POST'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceJobs"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodJobsIdVarOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceJobsIdVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodApplicationsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceApplications"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodApplicationsIdVarStatusOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,PUT'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceApplicationsIdVarStatus"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodApplicationsStudentEmailVarOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceApplicationsStudentEmailVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodInterviewsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceInterviews"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodInterviewsApplicationApplicationidVarOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceInterviewsApplicationApplicationidVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodOffersGenerateOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceOffersGenerate"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodStudentsRegisterPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
               "RequestParameters": {},
               "ResourceId": {
-                "Ref": "ApiGatewayResourceHello"
+                "Ref": "ApiGatewayResourceStudentsRegister"
               },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               },
               "ApiKeyRequired": false,
-              "AuthorizationType": "CUSTOM",
-              "AuthorizerId": {
-                "Ref": "AuthorizerApiGatewayAuthorizer"
-              },
+              "AuthorizationType": "NONE",
               "Integration": {
                 "IntegrationHttpMethod": "POST",
                 "Type": "AWS_PROXY",
@@ -294,7 +1843,7 @@
                       ":lambda:path/2015-03-31/functions/",
                       {
                         "Fn::GetAtt": [
-                          "HelloLambdaFunction",
+                          "RegisterStudentLambdaFunction",
                           "Arn"
                         ]
                       },
@@ -306,45 +1855,700 @@
               "MethodResponses": []
             },
             "DependsOn": [
-              "AuthorizerApiGatewayAuthorizer"
+              "RegisterStudentLambdaPermissionApiGateway"
             ]
           },
-          "AuthorizerApiGatewayAuthorizer": {
-            "Type": "AWS::ApiGateway::Authorizer",
+          "ApiGatewayMethodStudentsEmailVarGet": {
+            "Type": "AWS::ApiGateway::Method",
             "Properties": {
-              "AuthorizerResultTtlInSeconds": 0,
-              "IdentitySource": "method.request.header.Authorization",
-              "Name": "authorizer",
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceStudentsEmailVar"
+              },
               "RestApiId": {
                 "Ref": "ApiGatewayRestApi"
               },
-              "AuthorizerUri": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:",
-                    {
-                      "Ref": "AWS::Partition"
-                    },
-                    ":apigateway:",
-                    {
-                      "Ref": "AWS::Region"
-                    },
-                    ":lambda:path/2015-03-31/functions/",
-                    {
-                      "Fn::GetAtt": [
-                        "AuthorizerLambdaFunction",
-                        "Arn"
-                      ]
-                    },
-                    "/invocations"
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "GetStudentLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
                   ]
-                ]
+                }
               },
-              "Type": "TOKEN"
-            }
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "GetStudentLambdaPermissionApiGateway"
+            ]
           },
-          "ApiGatewayDeployment1780983856012": {
+          "ApiGatewayMethodStudentsEmailVarPut": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "PUT",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceStudentsEmailVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "UpdateStudentLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "UpdateStudentLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodStudentsEmailVarResumeDashurlGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceStudentsEmailVarResumeDashurl"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "GetResumeUploadUrlLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "GetResumeUploadUrlLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodCompaniesRegisterPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceCompaniesRegister"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "RegisterCompanyLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "RegisterCompanyLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodCompaniesEmailVarGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceCompaniesEmailVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "GetCompanyLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "GetCompanyLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodCompaniesStudentsGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceCompaniesStudents"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "ListStudentsLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "ListStudentsLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodJobsPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceJobs"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "CreateJobLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "CreateJobLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodJobsGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceJobs"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "ListJobsLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "ListJobsLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodJobsIdVarGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceJobsIdVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "GetJobLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "GetJobLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodApplicationsPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceApplications"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "ApplyJobLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "ApplyJobLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodApplicationsIdVarStatusPut": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "PUT",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceApplicationsIdVarStatus"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "UpdateApplicationStatusLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "UpdateApplicationStatusLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodApplicationsStudentEmailVarGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceApplicationsStudentEmailVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "GetStudentApplicationsLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "GetStudentApplicationsLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodInterviewsPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceInterviews"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "CreateInterviewLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "CreateInterviewLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodInterviewsApplicationApplicationidVarGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceInterviewsApplicationApplicationidVar"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "GetInterviewsLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "GetInterviewsLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayMethodOffersGeneratePost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "POST",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceOffersGenerate"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "GenerateOfferLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            },
+            "DependsOn": [
+              "GenerateOfferLambdaPermissionApiGateway"
+            ]
+          },
+          "ApiGatewayDeployment1781836811563": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -353,16 +2557,44 @@
               "StageName": "dev"
             },
             "DependsOn": [
-              "ApiGatewayMethodHelloOptions",
-              "ApiGatewayMethodHelloGet"
+              "ApiGatewayMethodStudentsRegisterOptions",
+              "ApiGatewayMethodStudentsEmailVarOptions",
+              "ApiGatewayMethodStudentsEmailVarResumeDashurlOptions",
+              "ApiGatewayMethodCompaniesRegisterOptions",
+              "ApiGatewayMethodCompaniesEmailVarOptions",
+              "ApiGatewayMethodCompaniesStudentsOptions",
+              "ApiGatewayMethodJobsOptions",
+              "ApiGatewayMethodJobsIdVarOptions",
+              "ApiGatewayMethodApplicationsOptions",
+              "ApiGatewayMethodApplicationsIdVarStatusOptions",
+              "ApiGatewayMethodApplicationsStudentEmailVarOptions",
+              "ApiGatewayMethodInterviewsOptions",
+              "ApiGatewayMethodInterviewsApplicationApplicationidVarOptions",
+              "ApiGatewayMethodOffersGenerateOptions",
+              "ApiGatewayMethodStudentsRegisterPost",
+              "ApiGatewayMethodStudentsEmailVarGet",
+              "ApiGatewayMethodStudentsEmailVarPut",
+              "ApiGatewayMethodStudentsEmailVarResumeDashurlGet",
+              "ApiGatewayMethodCompaniesRegisterPost",
+              "ApiGatewayMethodCompaniesEmailVarGet",
+              "ApiGatewayMethodCompaniesStudentsGet",
+              "ApiGatewayMethodJobsPost",
+              "ApiGatewayMethodJobsGet",
+              "ApiGatewayMethodJobsIdVarGet",
+              "ApiGatewayMethodApplicationsPost",
+              "ApiGatewayMethodApplicationsIdVarStatusPut",
+              "ApiGatewayMethodApplicationsStudentEmailVarGet",
+              "ApiGatewayMethodInterviewsPost",
+              "ApiGatewayMethodInterviewsApplicationApplicationidVarGet",
+              "ApiGatewayMethodOffersGeneratePost"
             ]
           },
-          "HelloLambdaPermissionApiGateway": {
+          "RegisterStudentLambdaPermissionApiGateway": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "HelloLambdaFunction",
+                  "RegisterStudentLambdaFunction",
                   "Arn"
                 ]
               },
@@ -394,12 +2626,12 @@
               }
             }
           },
-          "AuthorizerLambdaPermissionApiGateway": {
+          "GetStudentLambdaPermissionApiGateway": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "AuthorizerLambdaFunction",
+                  "GetStudentLambdaFunction",
                   "Arn"
                 ]
               },
@@ -429,6 +2661,655 @@
                   ]
                 ]
               }
+            }
+          },
+          "UpdateStudentLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "UpdateStudentLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "GetResumeUploadUrlLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "GetResumeUploadUrlLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "RegisterCompanyLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "RegisterCompanyLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "GetCompanyLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "GetCompanyLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "ListStudentsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "ListStudentsLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "CreateJobLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "CreateJobLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "ListJobsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "ListJobsLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "GetJobLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "GetJobLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "ApplyJobLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "ApplyJobLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "UpdateApplicationStatusLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "UpdateApplicationStatusLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "GetStudentApplicationsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "GetStudentApplicationsLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "CreateInterviewLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "CreateInterviewLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "GetInterviewsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "GetInterviewsLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "GenerateOfferLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "GenerateOfferLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "StudentsTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "PlacementPlatformStudents",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "email",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "email",
+                  "KeyType": "HASH"
+                }
+              ]
+            }
+          },
+          "CompaniesTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "PlacementPlatformCompanies",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "email",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "email",
+                  "KeyType": "HASH"
+                }
+              ]
+            }
+          },
+          "JobsTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "PlacementPlatformJobs",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "jobId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "jobId",
+                  "KeyType": "HASH"
+                }
+              ]
+            }
+          },
+          "ApplicationsTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "PlacementPlatformApplications",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "applicationId",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "email",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "applicationId",
+                  "KeyType": "HASH"
+                }
+              ],
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "EmailIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "email",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                }
+              ]
+            }
+          },
+          "InterviewsTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "Interviews",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "interviewId",
+                  "AttributeType": "S"
+                },
+                {
+                  "AttributeName": "applicationId",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "interviewId",
+                  "KeyType": "HASH"
+                }
+              ],
+              "GlobalSecondaryIndexes": [
+                {
+                  "IndexName": "ApplicationIndex",
+                  "KeySchema": [
+                    {
+                      "AttributeName": "applicationId",
+                      "KeyType": "HASH"
+                    }
+                  ],
+                  "Projection": {
+                    "ProjectionType": "ALL"
+                  }
+                }
+              ]
             }
           }
         },
@@ -436,25 +3317,160 @@
           "ServerlessDeploymentBucketName": {
             "Value": "serverless-framework-deployments-ap-south-1-8f9017e9-a74e",
             "Export": {
-              "Name": "sls-placement-platform-dev-ServerlessDeploymentBucketName"
+              "Name": "sls-placement-recruitment-backend-dev-ServerlessDeploymentBucketName"
             }
           },
-          "AuthorizerLambdaFunctionQualifiedArn": {
+          "RegisterStudentLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "AuthorizerLambdaVersionaOFxTWkYomOb1RNTE2cARX9MieVEmQdVqyXiaeDqlQ"
+              "Ref": "RegisterStudentLambdaVersionFS6RvT9eLaA7xmBxarERw4fuZVHWljv57aaZN5SsOQ"
             },
             "Export": {
-              "Name": "sls-placement-platform-dev-AuthorizerLambdaFunctionQualifiedArn"
+              "Name": "sls-placement-recruitment-backend-dev-RegisterStudentLambdaFunctionQualifiedArn"
             }
           },
-          "HelloLambdaFunctionQualifiedArn": {
+          "GetStudentLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "HelloLambdaVersionltDrKkzcPglDSHtNUEMZiGrTiO4YEVlWa3v1Rhb9LUs"
+              "Ref": "GetStudentLambdaVersionAlWUCcUOpYkyUsaO4WEVuTCJTW7gReObSOK7PWmsVo"
             },
             "Export": {
-              "Name": "sls-placement-platform-dev-HelloLambdaFunctionQualifiedArn"
+              "Name": "sls-placement-recruitment-backend-dev-GetStudentLambdaFunctionQualifiedArn"
+            }
+          },
+          "UpdateStudentLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "UpdateStudentLambdaVersionG49xH4oH6OtXcZY7Q1Xoy52MmtP6xBk7g6gcBMH8"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-UpdateStudentLambdaFunctionQualifiedArn"
+            }
+          },
+          "GetResumeUploadUrlLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetResumeUploadUrlLambdaVersionMrz5p8wzNRXGHtFCNX1M3CNXD8ohiWspIUI3d7ueSNc"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-GetResumeUploadUrlLambdaFunctionQualifiedArn"
+            }
+          },
+          "RegisterCompanyLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "RegisterCompanyLambdaVersion9bDr9xe29ibTFU9RxyeYXOUaIKXduJw7cmaGSJ76GI"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-RegisterCompanyLambdaFunctionQualifiedArn"
+            }
+          },
+          "GetCompanyLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetCompanyLambdaVersionCooM6aXWneOioLNaCHLz5KpFPro7zyZ36JX5U4qdaYI"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-GetCompanyLambdaFunctionQualifiedArn"
+            }
+          },
+          "ListStudentsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "ListStudentsLambdaVersionVJRX9b5whuTRrC6zPhbDMOirGcUMwJZKJuyyQ1ePfk"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-ListStudentsLambdaFunctionQualifiedArn"
+            }
+          },
+          "CreateJobLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CreateJobLambdaVersionuqToqAmLZRMAWTeFNl5mZpq3zANHP6eCtKoz1IPE"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-CreateJobLambdaFunctionQualifiedArn"
+            }
+          },
+          "ListJobsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "ListJobsLambdaVersion1dt32smrSKAW2GenfQ7ak0pXVQrUJo1lQK9ieTM"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-ListJobsLambdaFunctionQualifiedArn"
+            }
+          },
+          "GetJobLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetJobLambdaVersionbPWZn0vcrJSQwsZn8BlAI7EtJivuGaV28GLoxEGjY"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-GetJobLambdaFunctionQualifiedArn"
+            }
+          },
+          "ApplyJobLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "ApplyJobLambdaVersion2TBNWoEFmH0fcm8Vtfc72EA6EHrR3MZGqf8FGVoOFM"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-ApplyJobLambdaFunctionQualifiedArn"
+            }
+          },
+          "UpdateApplicationStatusLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "UpdateApplicationStatusLambdaVersionVHe9aajPLl2X0lx3P8EbnTgnO5edTBVgJH8J58R040"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-UpdateApplicationStatusLambdaFunctionQualifiedArn"
+            }
+          },
+          "GetStudentApplicationsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetStudentApplicationsLambdaVersionx0mgf3saAoJDbrk72wWsNGnUVXmePXjlZfGnmacNg"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-GetStudentApplicationsLambdaFunctionQualifiedArn"
+            }
+          },
+          "CreateInterviewLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CreateInterviewLambdaVersion7DjSVxY4zJXaNlWL7toSIh3wy3HPVwQgeaS2Wh1u6XA"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-CreateInterviewLambdaFunctionQualifiedArn"
+            }
+          },
+          "GetInterviewsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetInterviewsLambdaVersion6ZixzMUe6fhNCH7AvEVlpNhhFXeXREmT0fBzxyrzLk"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-GetInterviewsLambdaFunctionQualifiedArn"
+            }
+          },
+          "ParseResumeLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "ParseResumeLambdaVersionYGNNCCKgxPePI0Z8nf67zyKd55SEOTuGaA4MzUi1Xw"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-ParseResumeLambdaFunctionQualifiedArn"
+            }
+          },
+          "GenerateOfferLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GenerateOfferLambdaVersionBWUEKlnKPEJkmRM1wkLss5wzUeT0bjV3HyCH42vq4A"
+            },
+            "Export": {
+              "Name": "sls-placement-recruitment-backend-dev-GenerateOfferLambdaFunctionQualifiedArn"
             }
           },
           "ServiceEndpoint": {
@@ -480,7 +3496,7 @@
               ]
             },
             "Export": {
-              "Name": "sls-placement-platform-dev-ServiceEndpoint"
+              "Name": "sls-placement-recruitment-backend-dev-ServiceEndpoint"
             }
           }
         }
@@ -489,26 +3505,48 @@
     },
     "pluginsData": {},
     "functions": {
-      "authorizer": {
-        "handler": "src/authorizer.handler",
-        "events": [],
-        "name": "placement-platform-dev-authorizer",
-        "environment": {
-          "NODE_OPTIONS": "--enable-source-maps"
-        },
+      "registerStudent": {
+        "handler": "src/students.register",
+        "events": [
+          {
+            "http": {
+              "path": "students/register",
+              "method": "post",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "POST"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-registerStudent",
         "package": {},
         "memory": 1024,
         "timeout": 6,
         "runtime": "nodejs18.x",
         "vpc": {},
-        "versionLogicalId": "AuthorizerLambdaVersionaOFxTWkYomOb1RNTE2cARX9MieVEmQdVqyXiaeDqlQ"
+        "versionLogicalId": "RegisterStudentLambdaVersionFS6RvT9eLaA7xmBxarERw4fuZVHWljv57aaZN5SsOQ"
       },
-      "hello": {
-        "handler": "src/hello.handler",
+      "getStudent": {
+        "handler": "src/students.getById",
         "events": [
           {
             "http": {
-              "path": "hello",
+              "path": "students/{email}",
               "method": "get",
               "cors": {
                 "origin": "*",
@@ -527,62 +3565,691 @@
                 ],
                 "allowCredentials": false
               },
-              "authorizer": {
-                "type": "token",
-                "name": "authorizer",
-                "arn": {
-                  "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"AuthorizerLambdaPermissionApiGateway\"][\"Properties\"][\"FunctionName\"]"
-                },
-                "managedExternally": false,
-                "resultTtlInSeconds": 0,
-                "identitySource": "method.request.header.Authorization",
-                "claims": []
-              },
               "integration": "AWS_PROXY"
             }
           }
         ],
-        "name": "placement-platform-dev-hello",
-        "environment": {
-          "NODE_OPTIONS": "--enable-source-maps"
-        },
+        "name": "placement-recruitment-backend-dev-getStudent",
         "package": {},
         "memory": 1024,
         "timeout": 6,
         "runtime": "nodejs18.x",
         "vpc": {},
-        "versionLogicalId": "HelloLambdaVersionltDrKkzcPglDSHtNUEMZiGrTiO4YEVlWa3v1Rhb9LUs"
+        "versionLogicalId": "GetStudentLambdaVersionAlWUCcUOpYkyUsaO4WEVuTCJTW7gReObSOK7PWmsVo"
+      },
+      "updateStudent": {
+        "handler": "src/students.update",
+        "events": [
+          {
+            "http": {
+              "path": "students/{email}",
+              "method": "put",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "PUT"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-updateStudent",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "UpdateStudentLambdaVersionG49xH4oH6OtXcZY7Q1Xoy52MmtP6xBk7g6gcBMH8"
+      },
+      "getResumeUploadUrl": {
+        "handler": "src/resumes.getUploadUrl",
+        "events": [
+          {
+            "http": {
+              "path": "students/{email}/resume-url",
+              "method": "get",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "GET"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-getResumeUploadUrl",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "GetResumeUploadUrlLambdaVersionMrz5p8wzNRXGHtFCNX1M3CNXD8ohiWspIUI3d7ueSNc"
+      },
+      "registerCompany": {
+        "handler": "src/companies.register",
+        "events": [
+          {
+            "http": {
+              "path": "companies/register",
+              "method": "post",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "POST"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-registerCompany",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "RegisterCompanyLambdaVersion9bDr9xe29ibTFU9RxyeYXOUaIKXduJw7cmaGSJ76GI"
+      },
+      "getCompany": {
+        "handler": "src/companies.getById",
+        "events": [
+          {
+            "http": {
+              "path": "companies/{email}",
+              "method": "get",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "GET"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-getCompany",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "GetCompanyLambdaVersionCooM6aXWneOioLNaCHLz5KpFPro7zyZ36JX5U4qdaYI"
+      },
+      "listStudents": {
+        "handler": "src/companies.listStudents",
+        "events": [
+          {
+            "http": {
+              "path": "companies/students",
+              "method": "get",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "GET"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-listStudents",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "ListStudentsLambdaVersionVJRX9b5whuTRrC6zPhbDMOirGcUMwJZKJuyyQ1ePfk"
+      },
+      "createJob": {
+        "handler": "src/jobs.create",
+        "events": [
+          {
+            "http": {
+              "path": "jobs",
+              "method": "post",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "POST"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-createJob",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "CreateJobLambdaVersionuqToqAmLZRMAWTeFNl5mZpq3zANHP6eCtKoz1IPE"
+      },
+      "listJobs": {
+        "handler": "src/jobs.list",
+        "events": [
+          {
+            "http": {
+              "path": "jobs",
+              "method": "get",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "GET"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-listJobs",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "ListJobsLambdaVersion1dt32smrSKAW2GenfQ7ak0pXVQrUJo1lQK9ieTM"
+      },
+      "getJob": {
+        "handler": "src/jobs.getById",
+        "events": [
+          {
+            "http": {
+              "path": "jobs/{id}",
+              "method": "get",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "GET"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-getJob",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "GetJobLambdaVersionbPWZn0vcrJSQwsZn8BlAI7EtJivuGaV28GLoxEGjY"
+      },
+      "applyJob": {
+        "handler": "src/applications.apply",
+        "events": [
+          {
+            "http": {
+              "path": "applications",
+              "method": "post",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "POST"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-applyJob",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "ApplyJobLambdaVersion2TBNWoEFmH0fcm8Vtfc72EA6EHrR3MZGqf8FGVoOFM"
+      },
+      "updateApplicationStatus": {
+        "handler": "src/applications.updateStatus",
+        "events": [
+          {
+            "http": {
+              "path": "applications/{id}/status",
+              "method": "put",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "PUT"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-updateApplicationStatus",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "UpdateApplicationStatusLambdaVersionVHe9aajPLl2X0lx3P8EbnTgnO5edTBVgJH8J58R040"
+      },
+      "getStudentApplications": {
+        "handler": "src/applications.getByStudent",
+        "events": [
+          {
+            "http": {
+              "path": "applications/student/{email}",
+              "method": "get",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "GET"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-getStudentApplications",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "GetStudentApplicationsLambdaVersionx0mgf3saAoJDbrk72wWsNGnUVXmePXjlZfGnmacNg"
+      },
+      "createInterview": {
+        "handler": "src/interviews.create",
+        "events": [
+          {
+            "http": {
+              "path": "interviews",
+              "method": "post",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "POST"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-createInterview",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "CreateInterviewLambdaVersion7DjSVxY4zJXaNlWL7toSIh3wy3HPVwQgeaS2Wh1u6XA"
+      },
+      "getInterviews": {
+        "handler": "src/interviews.getByApplication",
+        "events": [
+          {
+            "http": {
+              "path": "interviews/application/{applicationId}",
+              "method": "get",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "GET"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-getInterviews",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "GetInterviewsLambdaVersion6ZixzMUe6fhNCH7AvEVlpNhhFXeXREmT0fBzxyrzLk"
+      },
+      "parseResume": {
+        "handler": "src/resumeParser.handler",
+        "events": [],
+        "name": "placement-recruitment-backend-dev-parseResume",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "ParseResumeLambdaVersionYGNNCCKgxPePI0Z8nf67zyKd55SEOTuGaA4MzUi1Xw"
+      },
+      "generateOffer": {
+        "handler": "src/offerLetter.generate",
+        "events": [
+          {
+            "http": {
+              "path": "offers/generate",
+              "method": "post",
+              "cors": {
+                "origin": "*",
+                "methods": [
+                  "OPTIONS",
+                  "POST"
+                ],
+                "headers": [
+                  "Content-Type",
+                  "X-Amz-Date",
+                  "Authorization",
+                  "X-Api-Key",
+                  "X-Amz-Security-Token",
+                  "X-Amz-User-Agent",
+                  "X-Amzn-Trace-Id"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "name": "placement-recruitment-backend-dev-generateOffer",
+        "package": {},
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "GenerateOfferLambdaVersionBWUEKlnKPEJkmRM1wkLss5wzUeT0bjV3HyCH42vq4A"
       }
+    },
+    "resources": {
+      "Resources": {
+        "StudentsTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "PlacementPlatformStudents",
+            "BillingMode": "PAY_PER_REQUEST",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "email",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "email",
+                "KeyType": "HASH"
+              }
+            ]
+          }
+        },
+        "CompaniesTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "PlacementPlatformCompanies",
+            "BillingMode": "PAY_PER_REQUEST",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "email",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "email",
+                "KeyType": "HASH"
+              }
+            ]
+          }
+        },
+        "JobsTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "PlacementPlatformJobs",
+            "BillingMode": "PAY_PER_REQUEST",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "jobId",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "jobId",
+                "KeyType": "HASH"
+              }
+            ]
+          }
+        },
+        "ApplicationsTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "PlacementPlatformApplications",
+            "BillingMode": "PAY_PER_REQUEST",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "applicationId",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "email",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "applicationId",
+                "KeyType": "HASH"
+              }
+            ],
+            "GlobalSecondaryIndexes": [
+              {
+                "IndexName": "EmailIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "email",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              }
+            ]
+          }
+        },
+        "InterviewsTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "Interviews",
+            "BillingMode": "PAY_PER_REQUEST",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "interviewId",
+                "AttributeType": "S"
+              },
+              {
+                "AttributeName": "applicationId",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "interviewId",
+                "KeyType": "HASH"
+              }
+            ],
+            "GlobalSecondaryIndexes": [
+              {
+                "IndexName": "ApplicationIndex",
+                "KeySchema": [
+                  {
+                    "AttributeName": "applicationId",
+                    "KeyType": "HASH"
+                  }
+                ],
+                "Projection": {
+                  "ProjectionType": "ALL"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "Outputs": {}
     },
     "configValidationMode": "warn",
     "serviceFilename": "serverless",
     "initialServerlessConfig": {
-      "service": "placement-platform",
+      "service": "placement-recruitment-backend",
       "provider": {
         "$ref": "$[\"service\"][\"provider\"]"
       },
-      "useDotenv": true,
-      "build": {
-        "esbuild": {
-          "bundle": true,
-          "minify": false,
-          "format": "cjs",
-          "target": "node18"
-        }
-      },
       "functions": {
         "$ref": "$[\"service\"][\"functions\"]"
+      },
+      "resources": {
+        "$ref": "$[\"service\"][\"resources\"]"
       }
     },
     "appId": null,
     "orgId": null,
-    "build": {
-      "$ref": "$[\"service\"][\"initialServerlessConfig\"][\"build\"]"
-    },
-    "layers": {}
+    "layers": {},
+    "artifact": "C:\\workspace\\Serverless Recruitment & Placement Platform\\backend\\.serverless\\placement-recruitment-backend.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/placement-platform/dev/1780983865293-2026-06-09T05:44:25.293Z",
-    "artifact": "placement-platform.zip"
+    "artifactDirectoryName": "serverless/placement-recruitment-backend/dev/1781836823756-2026-06-19T02:40:23.756Z",
+    "artifact": "placement-recruitment-backend.zip"
   }
 }

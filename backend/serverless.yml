@@ -4,6 +4,9 @@ provider:
   name: aws
   runtime: nodejs18.x
   region: ap-south-1
+  environment:
+    RESUME_BUCKET: placement-resumes-dev-adityaanand
+    FROM_EMAIL: aaa.adityaanand@gmail.com # 📧 Verified Email Target
 
   iam:
     role:
@@ -16,16 +19,108 @@ provider:
             - dynamodb:DeleteItem
             - dynamodb:Query
             - dynamodb:Scan
-          Resource: 'arn:aws:dynamodb:ap-south-1:*:table/PlacementPlatformStudents'
+          # 🔐 Master IAM security permissions grid across all database tables + indexes
+          Resource:
+            - 'arn:aws:dynamodb:ap-south-1:*:table/PlacementPlatformStudents'
+            - 'arn:aws:dynamodb:ap-south-1:*:table/PlacementPlatformCompanies'
+            - 'arn:aws:dynamodb:ap-south-1:*:table/PlacementPlatformJobs'
+            - 'arn:aws:dynamodb:ap-south-1:*:table/PlacementPlatformApplications'
+            - 'arn:aws:dynamodb:ap-south-1:*:table/PlacementPlatformApplications/index/*'
+            - 'arn:aws:dynamodb:ap-south-1:*:table/Interviews'
+            - 'arn:aws:dynamodb:ap-south-1:*:table/Interviews/index/*'
+          
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+            - s3:DeleteObject
+          Resource: 'arn:aws:s3:::placement-resumes-dev-adityaanand/*'
+
+        # ✉️ Day 12: AWS SES Permissions to send notifications
+        - Effect: Allow
+          Action:
+            - ses:SendEmail
+          Resource: '*'
 
 functions:
   registerStudent:
     handler: src/students.register
     events:
-      - http:
-          path: /students/register
-          method: post
-          cors: true
+      - http: { path: /students/register, method: post, cors: true }
+  getStudent:
+    handler: src/students.getById
+    events:
+      - http: { path: "/students/{email}", method: get, cors: true }
+  updateStudent:
+    handler: src/students.update
+    events:
+      - http: { path: "/students/{email}", method: put, cors: true }
+  getResumeUploadUrl:
+    handler: src/resumes.getUploadUrl
+    events:
+      - http: { path: "/students/{email}/resume-url", method: get, cors: true }
+
+  registerCompany:
+    handler: src/companies.register
+    events:
+      - http: { path: /companies/register, method: post, cors: true }
+  getCompany:
+    handler: src/companies.getById
+    events:
+      - http: { path: "/companies/{email}", method: get, cors: true }
+  listStudents:
+    handler: src/companies.listStudents
+    events:
+      - http: { path: /companies/students, method: get, cors: true }
+
+  createJob:
+    handler: src/jobs.create
+    events:
+      - http: { path: /jobs, method: post, cors: true }
+  listJobs:
+    handler: src/jobs.list
+    events:
+      - http: { path: /jobs, method: get, cors: true }
+  getJob:
+    handler: src/jobs.getById
+    events:
+      - http: { path: "/jobs/{id}", method: get, cors: true }
+
+  applyJob:
+    handler: src/applications.apply
+    events:
+      - http: { path: /applications, method: post, cors: true }
+
+  updateApplicationStatus:
+    handler: src/applications.updateStatus
+    events:
+      - http: { path: "/applications/{id}/status", method: put, cors: true }
+
+  getStudentApplications:
+    handler: src/applications.getByStudent
+    events:
+      - http: { path: "/applications/student/{email}", method: get, cors: true }
+
+  # 📅 Day 12: Interview Management Routes
+  createInterview:
+    handler: src/interviews.create
+    events:
+      - http: { path: /interviews, method: post, cors: true }
+
+  getInterviews:
+    handler: src/interviews.getByApplication
+    events:
+      - http: { path: "/interviews/application/{applicationId}", method: get, cors: true }
+
+  # 📄 Day 14: Asynchronous S3 Data Engine Trigger 
+  parseResume:
+    handler: src/resumeParser.handler
+
+  # 📄 Day 15: Document Compiling Engine & Automated Offer Letter Dispatch
+  generateOffer:
+    handler: src/offerLetter.generate
+    events:
+      - http: { path: /offers/generate, method: post, cors: true }
 
 resources:
   Resources:
@@ -40,3 +135,70 @@ resources:
         KeySchema:
           - AttributeName: email
             KeyType: HASH
+
+    CompaniesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: PlacementPlatformCompanies
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+
+    JobsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: PlacementPlatformJobs
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: jobId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: jobId
+            KeyType: HASH
+
+    ApplicationsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: PlacementPlatformApplications
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: applicationId
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: applicationId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: EmailIndex
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    # 📅 Day 12: Interview Storage Infrastructure + Secondary Query Index Architecture
+    InterviewsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Interviews
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: interviewId
+            AttributeType: S
+          - AttributeName: applicationId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: interviewId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: ApplicationIndex
+            KeySchema:
+              - AttributeName: applicationId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL

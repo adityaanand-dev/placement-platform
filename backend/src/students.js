@@ -1,6 +1,6 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, PutCommand } = require('@aws-sdk/lib-dynamodb');
-const { v4: uuidv4 } = require('uuid');
+const { DynamoDBDocumentClient, PutCommand, GetCommand, UpdateCommand } = require('@aws-sdk/lib-dynamodb');
+const crypto = require('crypto'); // 💡 Uses built-in Node.js crypto module instead of external uuid package
 
 // Initialize the DynamoDB Document Client for ap-south-1 (Mumbai)
 const client = new DynamoDBClient({ region: 'ap-south-1' });
@@ -25,7 +25,7 @@ exports.register = async (event) => {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-    const studentId = uuidv4(); 
+    const studentId = crypto.randomUUID(); // 💡 Generates a flawless, secure random v4 UUID natively
 
     // 3. Assemble the Database Entity Object
     const studentItem = {
@@ -42,7 +42,7 @@ exports.register = async (event) => {
 
     // 4. Write to DynamoDB with an atomicity check to block duplicate emails
     await docClient.send(new PutCommand({
-      TableName: 'PlacementPlatformStudents', // 💡 Updated to match your serverless.yml resource name
+      TableName: 'PlacementPlatformStudents',
       Item: studentItem,
       ConditionExpression: 'attribute_not_exists(email)' // Blocks execution if email partition key already exists
     }));
@@ -73,6 +73,105 @@ exports.register = async (event) => {
       statusCode: 500, 
       headers: { 'Access-Control-Allow-Origin': '*' },
       body: JSON.stringify({ error: 'Internal Cloud Database Error', details: err.message }) 
+    };
+  }
+};
+
+// 1. Fetch Student Profile by Email (GET /students/{email})
+exports.getById = async (event) => {
+  try {
+    // We change pathParameters.id to pathParameters.email to match your Day 6 primary key
+    const email = event.pathParameters.email ? event.pathParameters.email.toLowerCase().trim() : null;
+
+    if (!email) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Email parameter is required' }) };
+    }
+
+    const result = await docClient.send(new GetCommand({
+      TableName: 'PlacementPlatformStudents', // Using your exact Day 6 table name
+      Key: { email } // Querying against your actual partition key
+    }));
+
+    if (!result.Item) {
+      return { 
+        statusCode: 404, 
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: `Student with email ${email} not found` }) 
+      };
+    }
+
+    return {
+      statusCode: 200,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify(result.Item)
+    };
+  } catch (err) {
+    console.error('GET Operation Failure:', err);
+    return { 
+      statusCode: 500, 
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ error: 'Internal Server Error', details: err.message }) 
+    };
+  }
+};
+
+// 2. Update Student Profile Fields Dynamically (PUT /students/{email})
+exports.update = async (event) => {
+  try {
+    const email = event.pathParameters.email ? event.pathParameters.email.toLowerCase().trim() : null;
+    if (!email) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Email parameter is required' }) };
+    }
+
+    if (!event.body) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Missing update payload body' }) };
+    }
+    const body = JSON.parse(event.body);
+
+    // Fields allowed to be dynamically altered by the user
+    const updateFields = ['name', 'phone', 'college', 'skills', 'cgpa', 'resumeUrl', 'status'];
+    let updateExp = 'SET updatedAt = :updatedAt';
+    let expValues = { ':updatedAt': new Date().toISOString() };
+    let expNames = {}; // Keeps reserved words safe
+
+    updateFields.forEach(field => {
+      if (body[field] !== undefined) {
+        // We use ExpressionAttributeNames (#field) to prevent conflicts with DynamoDB reserved keywords (like 'status')
+        updateExp += `, #${field} = :${field}`;
+        expValues[`:${field}`] = body[field];
+        expNames[`#${field}`] = field;
+      }
+    });
+
+    await docClient.send(new UpdateCommand({
+      TableName: 'PlacementPlatformStudents',
+      Key: { email },
+      UpdateExpression: updateExp,
+      ExpressionAttributeNames: expNames,
+      ExpressionAttributeValues: expValues,
+      ConditionExpression: 'attribute_exists(email)' // Fails explicitly if student record doesn't exist
+    }));
+
+    return {
+      statusCode: 200,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ message: 'Profile updated successfully!' })
+    };
+  } catch (err) {
+    console.error('UPDATE Operation Failure:', err);
+    
+    if (err.name === 'ConditionalCheckFailedException') {
+      return { 
+        statusCode: 404, 
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ error: 'Cannot update profile. No student account found with this email.' }) 
+      };
+    }
+
+    return { 
+      statusCode: 500, 
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ error: 'Internal Server Error', details: err.message }) 
     };
   }
 };
